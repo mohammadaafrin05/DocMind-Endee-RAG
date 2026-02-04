@@ -1,147 +1,207 @@
-📘 DocMind – Semantic Search & RAG using Endee
-1. Project Overview & Problem Statement
-Project Overview
+DocMind – Endee-powered RAG System
 
-DocMind is an AI-based semantic search and Retrieval-Augmented Generation (RAG) system built using Endee as the vector database.
-The system allows users to ask natural language questions and retrieves the most relevant information from a set of documents based on semantic similarity, not just keyword matching.
+DocMind is a Retrieval-Augmented Generation (RAG) application that enables users to semantically search and query documents using vector embeddings stored in Endee.
+It demonstrates how Endee can be used as a high-performance vector database for real-world AI applications.
 
-Problem Statement
+Project Overview & Problem Statement
+Problem
 
-Traditional keyword-based search systems fail to understand the meaning and intent behind user queries. This leads to irrelevant results, especially when queries are phrased differently from the stored text.
+Traditional keyword search fails to capture semantic meaning. As document collections grow, users need a way to search based on intent and context, not exact words.
 
-The goal of this project is to:
+Solution
 
-Convert documents into vector embeddings
+DocMind solves this by:
 
-Store and search them efficiently using a vector database
+Converting documents into semantic embeddings
 
-Retrieve the most relevant context for a given query
+Storing them in Endee
 
-2. System Design / Technical Approach
+Retrieving the most relevant content using vector similarity search
+
+Serving results via a FastAPI backend
+
+This architecture enables fast, accurate, and scalable document retrieval.
+
+System Design & Technical Approach
 High-Level Architecture
-User Query
+Documents
    ↓
-FastAPI Backend (Python)
+SentenceTransformer (Embeddings)
    ↓
-Sentence Transformer (Embeddings)
+Endee Vector Database
    ↓
-Endee Vector Database (C++ / Docker)
+FastAPI Backend
    ↓
-Top-K Semantic Results
-   ↓
-Final Answer (RAG-style)
+User Query → Semantic Search → Relevant Context
 
-Technical Flow
+Components
+Component	Description
+SentenceTransformers	Generates vector embeddings from text
+Endee	Stores and indexes embeddings for similarity search
+FastAPI	Backend API for querying documents
+Uvicorn	ASGI server for running the API
+Docker	Runs Endee server
+How Endee Is Used
 
-Documents are converted into embeddings using a transformer model.
+Endee acts as the vector database in this system.
 
-Embeddings are stored in Endee (vector database).
+Responsibilities
 
-User queries are also embedded using the same model.
+Stores document embeddings
 
-Endee performs vector similarity search.
+Performs similarity search
 
-Retrieved results are returned as contextual answers.
+Returns top-K relevant results
 
-3. How Endee is Used
+Why Endee?
 
-Endee is deployed as a standalone C++ vector database server using Docker.
+High-performance C++ backend
 
-It is not used as a Python library.
+Efficient vector indexing
 
-Python communicates with Endee via REST APIs.
+Simple HTTP API
 
-Endee handles:
+Suitable for RAG workflows
 
-Vector storage
+Endee runs as a Docker service and is accessed by the Python application via HTTP.
 
-Indexing
-
-Semantic similarity search
-
-Indexes are auto-created during ingestion.
-
-This setup reflects a real-world production architecture where the database and application layers are decoupled.
-
-4. Project Structure
+Project Structure
 DocMind-Endee-RAG/
-│
-├── app.py              # FastAPI application
-├── ingest.py           # Document ingestion script
-├── query.py            # Semantic search logic
-├── requirements.txt    # Python dependencies
-│
 ├── data/
-│   └── documents.txt   # Sample documents
-│
-├── endee/
-│   ├── docker-compose.yml
-│   ├── infra/Dockerfile
-│   ├── src/
-│   └── install.sh
-│
-└── venv/
+│   └── documents.txt        # Input documents
+├── endee/                   # Endee Docker setup
+├── ingest.py                # Document ingestion script
+├── query.py                 # Semantic search logic
+├── app.py                   # FastAPI application
+├── requirements.txt
+└── README.md
 
-5. Setup & Execution Instructions
-Prerequisites
+Setup Instructions
+1️.Prerequisites
 
 Python 3.10+
 
 Docker & Docker Compose
 
-WSL (for Windows users)
+Git
 
-Step 1: Clone the Repository
-git clone <your-github-repo-url>
+2️.Clone the Repository
+git clone https://github.com/<your-username>/DocMind-Endee-RAG.git
 cd DocMind-Endee-RAG
 
-Step 2: Start Endee Vector Database
+3️.Start Endee Server (Docker)
 cd endee
 docker-compose up --build
 
 
-Endee will run at:
-
+Endee will start at:
 http://localhost:8080
 
-Step 3: Set Up Python Environment
+Verify health:
+
+curl http://localhost:8080/api/v1/health
+
+
+Expected response:
+
+{"status":"ok"}
+
+4️.Set Up Python Environment
 python -m venv venv
-venv\Scripts\activate
+source venv/bin/activate   # Linux / Mac
+venv\Scripts\activate      # Windows
+
+
+Install dependencies:
+
 pip install -r requirements.txt
 
-Step 4: Ingest Documents
+Ingest Documents into Endee
+
+Ensure data/documents.txt contains sample text.
+
+Run:
+
 python ingest.py
 
 
 Expected output:
 
-✅ All documents successfully ingested into Endee
+ Documents successfully ingested into Endee
 
-Step 5: Run FastAPI Application
+
+This step:
+
+Reads documents
+
+Creates embeddings
+
+Stores them in Endee
+
+ Run the API Server
 uvicorn app:app --reload
 
 
-API runs at:
+API will be available at:
 
 http://127.0.0.1:8000
 
-Step 6: Test the Application
+ How to Check the Working Use Case
+1️.Verify API Is Running
 
-Open in browser:
+Open browser:
 
-http://127.0.0.1:8000/ask?question=What is Endee?
+http://127.0.0.1:8000/
 
 
-You will receive a semantic answer based on stored documents.
+Response:
 
-6. Features Demonstrated
+{"status":"DocMind Endee RAG running"}
 
-Semantic Search
+2️.Ask a Semantic Question
 
-Retrieval-Augmented Generation (RAG-style)
+Example:
 
-Vector database integration using Endee
+http://127.0.0.1:8000/ask?question=What is Endee used for?
 
-REST-based AI system architecture
 
-Dockerized backend with Python ML pipeline
+Expected response:
+
+{
+  "question": "What is Endee used for?",
+  "answer": "Endee is used for storing and searching vector embeddings...",
+  "sources": [
+    "Endee is a high-performance vector database..."
+  ]
+}
+
+
+This confirms:
+
+Query embedding is generated
+
+Endee similarity search is working
+
+Relevant document context is returned
+
+ Key Highlights
+
+End-to-end RAG pipeline
+
+Production-grade vector database
+
+Clean FastAPI interface
+
+Dockerized backend service
+
+Easily extensible for LLM integration
+
+ Future Enhancements
+
+Add LLM (OpenAI / Ollama / HuggingFace) for answer generation
+
+Support PDF ingestion
+
+Add authentication
+
+UI frontend
