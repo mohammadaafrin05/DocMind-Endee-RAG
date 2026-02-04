@@ -1,0 +1,5 @@
+Endee is a lightweight vector database designed for fast semantic search.
+Vector databases store embeddings instead of raw text.
+RAG stands for Retrieval Augmented Generation.
+RAG improves AI answers by using external documents.
+Endee can be used for semantic search and AI applications.
